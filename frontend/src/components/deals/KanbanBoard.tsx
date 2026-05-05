@@ -1,100 +1,55 @@
-import {
-  DragDropContext,
-  Droppable,
-  Draggable,
-} from "@hello-pangea/dnd";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import DealCard from "./DealCard";
 
-import type { DropResult } from "@hello-pangea/dnd";
-type Deal = {
-  id: string;
-  name: string;
-  amount: number;
-  probability: number;
-};
+const stages = ["New", "Qualified", "Proposal", "Won"];
 
-type ColumnType = {
-  name: string;
-  items: Deal[];
-};
-
-type DataType = {
-  [key: string]: ColumnType;
-};
-
-type Props = {
-  data: DataType;
-  setData: (data: DataType) => void;
-};
-
-export default function KanbanBoard({ data, setData }: Props) {
-  const onDragEnd = (result: DropResult) => {
+function KanbanBoard({ deals, setDeals, onSelect }: any) {
+  const onDragEnd = (result: any) => {
     if (!result.destination) return;
 
-    const { source, destination } = result;
+    const updated = [...deals];
+    const draggedItem = updated.find(
+      (d) => d.id.toString() === result.draggableId
+    );
 
-    const sourceCol = data[source.droppableId];
-    const destCol = data[destination.droppableId];
-
-    const sourceItems = [...sourceCol.items];
-    const destItems = [...destCol.items];
-
-    const [movedItem] = sourceItems.splice(source.index, 1);
-
-    destItems.splice(destination.index, 0, movedItem);
-
-    setData({
-      ...data,
-      [source.droppableId]: {
-        ...sourceCol,
-        items: sourceItems,
-      },
-      [destination.droppableId]: {
-        ...destCol,
-        items: destItems,
-      },
-    });
+    if (draggedItem) {
+      draggedItem.stage = result.destination.droppableId;
+      setDeals([...updated]);
+    }
   };
 
   return (
     <DragDropContext onDragEnd={onDragEnd}>
-      <div className="flex gap-4 overflow-x-auto">
-        {Object.entries(data).map(([columnId, column]) => (
-          <Droppable droppableId={columnId} key={columnId}>
+      <div className="flex gap-4 p-4 overflow-x-auto">
+        {stages.map((stage) => (
+          <Droppable droppableId={stage} key={stage}>
             {(provided) => (
               <div
                 ref={provided.innerRef}
                 {...provided.droppableProps}
-                className="bg-gray-100 rounded-xl p-4 w-72 min-h-[400px]"
+                className="min-w-[300px] bg-gray-50 p-3 rounded-xl"
               >
-                <h2 className="font-bold text-lg mb-4">
-                  {column.name}
-                </h2>
+                <h2 className="font-bold mb-3">{stage}</h2>
 
-                {column.items.map((item, index) => (
-                  <Draggable
-                    key={item.id}
-                    draggableId={item.id}
-                    index={index}
-                  >
-                    {(provided) => (
-                      <div
-                        ref={provided.innerRef}
-                        {...provided.draggableProps}
-                        {...provided.dragHandleProps}
-                        className="bg-white p-3 mb-3 rounded-lg shadow"
-                      >
-                        <h3 className="font-semibold">{item.name}</h3>
-                        <p className="text-sm text-gray-500">
-                          ₹{item.amount}
-                        </p>
-
-                        <div className="mt-2 text-xs px-2 py-1 bg-blue-500 text-white rounded">
-                          {item.probability}%
+                {deals
+                  .filter((d: any) => d.stage === stage)
+                  .map((deal: any, index: number) => (
+                    <Draggable
+                      key={deal.id}
+                      draggableId={deal.id.toString()}
+                      index={index}
+                    >
+                      {(provided) => (
+                        <div
+                          ref={provided.innerRef}
+                          {...provided.draggableProps}
+                          {...provided.dragHandleProps}
+                        >
+                          <DealCard deal={deal} onSelect={onSelect} />
                         </div>
-                      </div>
-                    )}
-                  </Draggable>
-                ))}
+                      )}
+                    </Draggable>
+                  ))}
 
                 {provided.placeholder}
               </div>
@@ -105,3 +60,5 @@ export default function KanbanBoard({ data, setData }: Props) {
     </DragDropContext>
   );
 }
+
+export default KanbanBoard;

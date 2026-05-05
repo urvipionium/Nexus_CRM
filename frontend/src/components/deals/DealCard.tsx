@@ -18,4 +18,5 @@ const DealCard = ({ deal, onClick }: any) => {
   );
 };
 
+
 export default DealCard;
