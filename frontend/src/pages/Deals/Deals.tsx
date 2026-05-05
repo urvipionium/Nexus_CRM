@@ -2,18 +2,31 @@ import { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { motion } from "framer-motion";
 
+type Deal = {
+  id: string;
+  title: string;
+  value: number;
+  days: number;
+};
 
+type PipelineData = {
+  New: Deal[];
+  Proposal: Deal[];
+  Negotiation: Deal[];
+  Closed: Deal[];
+};
 
-const initialData = {
+const initialData: PipelineData = {
   New: [{ id: "1", title: "Website", value: 50000, days: 2 }],
   Proposal: [{ id: "2", title: "Mobile App", value: 120000, days: 5 }],
   Negotiation: [],
   Closed: []
 };
 
-export default function DealsProLayout() {
-  const [data, setData] = useState(initialData);
-  const [selectedDeal, setSelectedDeal] = useState<any>(null);
+export default function Deals() {
+  const [data, setData] = useState<PipelineData>(initialData);
+  const [selectedDeal, setSelectedDeal] = useState<Deal | null>(null);
+  const [showModal, setShowModal] = useState(false);
 
   const allDeals = Object.values(data).flat();
 
@@ -34,8 +47,8 @@ export default function DealsProLayout() {
     const source = result.source.droppableId;
     const dest = result.destination.droppableId;
 
-    const sourceItems = [...data[source]];
-    const destItems = [...data[dest]];
+    const sourceItems = [...(data[source] || [])];
+    const destItems = [...(data[dest] || [])];
 
     const [moved] = sourceItems.splice(result.source.index, 1);
     destItems.splice(result.destination.index, 0, moved);
@@ -48,56 +61,24 @@ export default function DealsProLayout() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-
-      {/* 🔥 MODERN SIDEBAR */}
-      <div className="w-64 bg-white border-r shadow-sm flex flex-col p-4">
-        <h1 className="text-xl font-bold text-blue-600 mb-6">🚀 CRM</h1>
-
-        {[
-          { name: "Dashboard", icon: "📊" },
-          { name: "Leads", icon: "👥" },
-          { name: "Deals", icon: "💼" },
-          { name: "WhatsApp", icon: "💬" },
-          { name: "Reports", icon: "📈" }
-        ].map((item, i) => (
-          <div
-            key={i}
-            className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer mb-2 transition
-              ${
-                item.name === "Deals"
-                  ? "bg-blue-100 text-blue-600 font-semibold"
-                  : "hover:bg-gray-100 text-gray-600"
-              }`}
-          >
-            <span>{item.icon}</span>
-            <span>{item.name}</span>
-          </div>
-        ))}
-
-        <div className="mt-auto pt-4 border-t">
-          <p className="text-sm text-gray-500">Logged in</p>
-          <p className="font-semibold">Dhairya</p>
-        </div>
-      </div>
+    <div className="flex h-screen">
 
       {/* 🚀 MAIN CONTENT */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* 🔥 TOP BAR WITH RIGHT BUTTON */}
+        {/* 🔥 HEADER */}
         <div className="flex justify-between items-center p-4">
           <h2 className="text-lg font-semibold">Deals Pipeline</h2>
 
-       <button
-  onClick={() => setShowModal(true)}
-  className="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600"
->
-  + Create Deal
-</button>
-
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600"
+          >
+            + Create Deal
+          </button>
         </div>
 
-        {/* 📊 DASHBOARD */}
+        {/* 📊 STATS */}
         <div className="px-4 grid grid-cols-3 gap-4">
           <div className="bg-white p-4 rounded-2xl shadow-sm">
             <p className="text-gray-500 text-sm">Pipeline Value</p>
@@ -147,7 +128,6 @@ export default function DealsProLayout() {
                           >
                             <h3 className="font-semibold">{deal.title}</h3>
                             <p className="text-sm text-gray-500">₹{deal.value}</p>
-
                             <p className="text-xs text-gray-400 mt-1">
                               {deal.days} days
                             </p>
