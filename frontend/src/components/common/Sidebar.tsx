@@ -40,7 +40,7 @@ function Sidebar() {
 
       <div className="mt-auto p-3 border-t">
         <p className="text-sm text-gray-500">Logged in as</p>
-        <p className="font-semibold">Dhairya</p>
+        <p className="font-semibold">HARSH</p>
       </div>
     </div>
   );

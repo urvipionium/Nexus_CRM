@@ -5,7 +5,7 @@ function Navbar() {
         placeholder="Search deals..."
         className="border px-4 py-2 rounded-lg w-1/3"
       />
-      <div>👤 Dhairya</div>
+      <div>👤 Harsh</div>
     </div>
   );
 }

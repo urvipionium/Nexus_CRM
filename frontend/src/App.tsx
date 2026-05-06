@@ -2,9 +2,10 @@ import { Routes, Route } from "react-router-dom";
 import Layout from "./components/common/Layout";
 
 import Deals from "./pages/Deals/Deals";
+import DashboardLayout from "./components/dashboard/DashboardLayout";
 
 function Dashboard() {
-  return <h1 className="p-6 text-xl">Dashboard Page</h1>;
+  return <DashboardLayout />;
 }
 
 function Leads() {
