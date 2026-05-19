@@ -2,6 +2,12 @@ import { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import { motion } from "framer-motion";
 
+type CustomField = {
+  id: number;
+  label: string;
+  type: string;
+};
+
 type Deal = {
   id: string;
   title: string;
@@ -46,9 +52,15 @@ export default function Deals() {
   const [selectedDeal, setSelectedDeal] =
     useState<Deal | null>(null);
 
-  // 🔥 MODAL
+  // 🔥 MAIN MODAL
   const [showModal, setShowModal] =
     useState(false);
+
+  // 🔥 CUSTOM FIELD MODAL
+  const [
+    showCustomFieldModal,
+    setShowCustomFieldModal
+  ] = useState(false);
 
   // 🔥 FORM STATE
   const [newDeal, setNewDeal] = useState({
@@ -57,7 +69,18 @@ export default function Deals() {
     stage: "New"
   });
 
-  // 🔥 GET DEAL AGING
+  // 🔥 CUSTOM FIELDS
+  const [customFields, setCustomFields] =
+    useState<CustomField[]>([]);
+
+  // 🔥 CUSTOM FIELD FORM
+  const [customField, setCustomField] =
+    useState({
+      label: "",
+      type: "text"
+    });
+
+  // 🔥 GET AGING
   const getDealAge = (createdAt: string) => {
     const createdDate = new Date(createdAt);
     const today = new Date();
@@ -154,7 +177,6 @@ export default function Deals() {
       ]
     });
 
-    // RESET
     setNewDeal({
       title: "",
       value: "",
@@ -164,13 +186,94 @@ export default function Deals() {
     setShowModal(false);
   };
 
+  // 🔥 ADD CUSTOM FIELD
+  const handleAddCustomField = () => {
+    if (!customField.label) return;
+
+    setCustomFields([
+      ...customFields,
+      {
+        id: Date.now(),
+        label: customField.label,
+        type: customField.type
+      }
+    ]);
+
+    setCustomField({
+      label: "",
+      type: "text"
+    });
+
+    setShowCustomFieldModal(false);
+  };
+
+  // 🔥 RENDER CUSTOM INPUT
+  const renderCustomFieldInput = (
+    field: CustomField
+  ) => {
+    switch (field.type) {
+      case "text":
+        return (
+          <input
+            type="text"
+            placeholder={`Enter ${field.label}`}
+            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        );
+
+      case "number":
+        return (
+          <input
+            type="number"
+            placeholder={`Enter ${field.label}`}
+            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        );
+
+      case "date":
+        return (
+          <input
+            type="date"
+            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        );
+
+      case "textarea":
+        return (
+          <textarea
+            rows={4}
+            placeholder={`Enter ${field.label}`}
+            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+          />
+        );
+
+      case "select":
+        return (
+          <select className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500">
+            <option>Select Option</option>
+          </select>
+        );
+
+      case "checkbox":
+        return (
+          <div className="flex items-center gap-2">
+            <input type="checkbox" />
+            <label>{field.label}</label>
+          </div>
+        );
+
+      default:
+        return null;
+    }
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
 
       {/* 🚀 MAIN CONTENT */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
-        {/* 🔥 HEADER */}
+        {/* HEADER */}
         <div className="flex justify-between items-center p-4">
 
           <h2 className="text-lg font-semibold">
@@ -186,7 +289,7 @@ export default function Deals() {
 
         </div>
 
-        {/* 📊 STATS */}
+        {/* STATS */}
         <div className="px-4 grid grid-cols-3 gap-4">
 
           <div className="bg-white p-4 rounded-2xl shadow-sm">
@@ -221,7 +324,7 @@ export default function Deals() {
 
         </div>
 
-        {/* 🔁 KANBAN */}
+        {/* KANBAN */}
         <DragDropContext onDragEnd={onDragEnd}>
           <div className="flex gap-6 p-6 overflow-x-auto">
 
@@ -237,7 +340,6 @@ export default function Deals() {
                     className="min-w-[260px] bg-white rounded-2xl shadow-sm p-4"
                   >
 
-                    {/* COLUMN HEADER */}
                     <h2 className="mb-3 font-semibold flex justify-between">
 
                       {col}
@@ -252,7 +354,6 @@ export default function Deals() {
 
                     </h2>
 
-                    {/* DEAL CARDS */}
                     {data[
                       col as keyof PipelineData
                     ].map(
@@ -315,7 +416,7 @@ export default function Deals() {
         </DragDropContext>
       </div>
 
-      {/* 👉 RIGHT PANEL */}
+      {/* RIGHT PANEL */}
       <div className="w-[340px] bg-white border-l p-4">
 
         {selectedDeal ? (
@@ -358,11 +459,11 @@ export default function Deals() {
 
       </div>
 
-      {/* 🔥 CREATE DEAL MODAL */}
+      {/* CREATE DEAL MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
 
-          <div className="bg-white w-[450px] rounded-2xl shadow-2xl p-6">
+          <div className="bg-white w-[500px] rounded-2xl shadow-2xl p-6 max-h-[90vh] overflow-y-auto">
 
             {/* HEADER */}
             <div className="flex justify-between items-center mb-6">
@@ -467,6 +568,49 @@ export default function Deals() {
 
               </div>
 
+              {/* CUSTOM FIELD SECTION */}
+              <div className="pt-4 border-t">
+
+                <div className="flex items-center justify-between mb-4">
+
+                  <h3 className="font-semibold text-gray-700">
+                    Custom Fields
+                  </h3>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setShowCustomFieldModal(
+                        true
+                      )
+                    }
+                    className="text-blue-500 text-sm font-medium hover:text-blue-600"
+                  >
+                    + Add Custom Field
+                  </button>
+
+                </div>
+
+                <div className="space-y-4">
+
+                  {customFields.map((field) => (
+                    <div key={field.id}>
+
+                      <label className="block text-sm font-medium mb-1">
+                        {field.label}
+                      </label>
+
+                      {renderCustomFieldInput(
+                        field
+                      )}
+
+                    </div>
+                  ))}
+
+                </div>
+
+              </div>
+
               {/* BUTTONS */}
               <div className="flex gap-3 pt-4">
 
@@ -487,6 +631,128 @@ export default function Deals() {
                 </button>
 
               </div>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* CUSTOM FIELD MODAL */}
+      {showCustomFieldModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]">
+
+          <div className="bg-white w-[420px] rounded-2xl p-6 shadow-2xl">
+
+            {/* HEADER */}
+            <div className="flex justify-between items-center mb-6">
+
+              <h2 className="text-xl font-bold">
+                Add Custom Field
+              </h2>
+
+              <button
+                onClick={() =>
+                  setShowCustomFieldModal(
+                    false
+                  )
+                }
+                className="text-2xl text-gray-400 hover:text-black"
+              >
+                ×
+              </button>
+
+            </div>
+
+            {/* FIELD LABEL */}
+            <div className="mb-4">
+
+              <label className="block text-sm font-medium mb-1">
+                Field Label
+              </label>
+
+              <input
+                type="text"
+                value={customField.label}
+                onChange={(e) =>
+                  setCustomField({
+                    ...customField,
+                    label: e.target.value
+                  })
+                }
+                placeholder="Enter field name"
+                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              />
+
+            </div>
+
+            {/* FIELD TYPE */}
+            <div className="mb-6">
+
+              <label className="block text-sm font-medium mb-1">
+                Data Type
+              </label>
+
+              <select
+                value={customField.type}
+                onChange={(e) =>
+                  setCustomField({
+                    ...customField,
+                    type: e.target.value
+                  })
+                }
+                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              >
+
+                <option value="text">
+                  Single Line Text
+                </option>
+
+                <option value="number">
+                  Number
+                </option>
+
+                <option value="date">
+                  Date
+                </option>
+
+                <option value="textarea">
+                  Multi Line Text
+                </option>
+
+                <option value="select">
+                  Dropdown
+                </option>
+
+                <option value="checkbox">
+                  Checkbox
+                </option>
+
+              </select>
+
+            </div>
+
+            {/* BUTTONS */}
+            <div className="flex gap-3">
+
+              <button
+                onClick={() =>
+                  setShowCustomFieldModal(
+                    false
+                  )
+                }
+                className="flex-1 border py-3 rounded-xl hover:bg-gray-100"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleAddCustomField}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl"
+              >
+                Add Field
+              </button>
 
             </div>
 
