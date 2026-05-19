@@ -16,10 +16,7 @@ type Deal = {
 };
 
 type PipelineData = {
-  New: Deal[];
-  Proposal: Deal[];
-  Negotiation: Deal[];
-  Closed: Deal[];
+  [key: string]: Deal[];
 };
 
 const initialData: PipelineData = {
@@ -52,7 +49,7 @@ export default function Deals() {
   const [selectedDeal, setSelectedDeal] =
     useState<Deal | null>(null);
 
-  // 🔥 MAIN MODAL
+  // 🔥 DEAL MODAL
   const [showModal, setShowModal] =
     useState(false);
 
@@ -62,16 +59,20 @@ export default function Deals() {
     setShowCustomFieldModal
   ] = useState(false);
 
-  // 🔥 FORM STATE
+  // 🔥 STAGE MODAL
+  const [showStageModal, setShowStageModal] =
+    useState(false);
+
+  // 🔥 NEW STAGE
+  const [newStage, setNewStage] =
+    useState("");
+
+  // 🔥 DEAL FORM
   const [newDeal, setNewDeal] = useState({
     title: "",
     value: "",
     stage: "New"
   });
-
-  // 🔥 CUSTOM FIELDS
-  const [customFields, setCustomFields] =
-    useState<CustomField[]>([]);
 
   // 🔥 CUSTOM FIELD FORM
   const [customField, setCustomField] =
@@ -80,9 +81,14 @@ export default function Deals() {
       type: "text"
     });
 
-  // 🔥 GET AGING
+  // 🔥 CUSTOM FIELDS
+  const [customFields, setCustomFields] =
+    useState<CustomField[]>([]);
+
+  // 🔥 DEAL AGING
   const getDealAge = (createdAt: string) => {
     const createdDate = new Date(createdAt);
+
     const today = new Date();
 
     const diffTime =
@@ -118,7 +124,8 @@ export default function Deals() {
   const conversionRate =
     allDeals.length > 0
       ? Math.round(
-          (data.Closed.length / allDeals.length) *
+          ((data["Closed"]?.length || 0) /
+            allDeals.length) *
             100
         )
       : 0;
@@ -128,11 +135,10 @@ export default function Deals() {
     if (!result.destination) return;
 
     const source =
-      result.source.droppableId as keyof PipelineData;
+      result.source.droppableId;
 
     const dest =
-      result.destination
-        .droppableId as keyof PipelineData;
+      result.destination.droppableId;
 
     const sourceItems = [...data[source]];
     const destItems = [...data[dest]];
@@ -169,10 +175,8 @@ export default function Deals() {
 
     setData({
       ...data,
-      [newDeal.stage as keyof PipelineData]: [
-        ...data[
-          newDeal.stage as keyof PipelineData
-        ],
+      [newDeal.stage]: [
+        ...data[newDeal.stage],
         deal
       ]
     });
@@ -184,6 +188,25 @@ export default function Deals() {
     });
 
     setShowModal(false);
+  };
+
+  // 🔥 ADD STAGE
+  const handleAddStage = () => {
+    if (!newStage) return;
+
+    setData({
+      ...data,
+      [newStage]: []
+    });
+
+    setNewDeal({
+      ...newDeal,
+      stage: newStage
+    });
+
+    setNewStage("");
+
+    setShowStageModal(false);
   };
 
   // 🔥 ADD CUSTOM FIELD
@@ -207,7 +230,7 @@ export default function Deals() {
     setShowCustomFieldModal(false);
   };
 
-  // 🔥 RENDER CUSTOM INPUT
+  // 🔥 RENDER FIELD
   const renderCustomFieldInput = (
     field: CustomField
   ) => {
@@ -216,8 +239,7 @@ export default function Deals() {
         return (
           <input
             type="text"
-            placeholder={`Enter ${field.label}`}
-            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border rounded-xl px-4 py-3"
           />
         );
 
@@ -225,8 +247,7 @@ export default function Deals() {
         return (
           <input
             type="number"
-            placeholder={`Enter ${field.label}`}
-            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border rounded-xl px-4 py-3"
           />
         );
 
@@ -234,7 +255,7 @@ export default function Deals() {
         return (
           <input
             type="date"
-            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border rounded-xl px-4 py-3"
           />
         );
 
@@ -242,14 +263,13 @@ export default function Deals() {
         return (
           <textarea
             rows={4}
-            placeholder={`Enter ${field.label}`}
-            className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border rounded-xl px-4 py-3"
           />
         );
 
       case "select":
         return (
-          <select className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500">
+          <select className="w-full border rounded-xl px-4 py-3">
             <option>Select Option</option>
           </select>
         );
@@ -270,7 +290,7 @@ export default function Deals() {
   return (
     <div className="flex h-screen bg-gray-100">
 
-      {/* 🚀 MAIN CONTENT */}
+      {/* MAIN */}
       <div className="flex-1 flex flex-col overflow-hidden">
 
         {/* HEADER */}
@@ -282,7 +302,7 @@ export default function Deals() {
 
           <button
             onClick={() => setShowModal(true)}
-            className="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600 shadow"
+            className="bg-blue-500 text-white px-4 py-2 rounded-xl hover:bg-blue-600"
           >
             + Create Deal
           </button>
@@ -326,6 +346,7 @@ export default function Deals() {
 
         {/* KANBAN */}
         <DragDropContext onDragEnd={onDragEnd}>
+
           <div className="flex gap-6 p-6 overflow-x-auto">
 
             {Object.keys(data).map((col) => (
@@ -345,18 +366,12 @@ export default function Deals() {
                       {col}
 
                       <span className="text-gray-400 text-sm">
-                        {
-                          data[
-                            col as keyof PipelineData
-                          ].length
-                        }
+                        {data[col].length}
                       </span>
 
                     </h2>
 
-                    {data[
-                      col as keyof PipelineData
-                    ].map(
+                    {data[col].map(
                       (
                         deal: Deal,
                         index: number
@@ -381,7 +396,7 @@ export default function Deals() {
                                   deal
                                 )
                               }
-                              className="bg-gray-50 p-4 rounded-xl shadow mb-3 cursor-pointer hover:shadow-md transition"
+                              className="bg-gray-50 p-4 rounded-xl shadow mb-3 cursor-pointer"
                             >
 
                               <h3 className="font-semibold">
@@ -413,7 +428,9 @@ export default function Deals() {
             ))}
 
           </div>
+
         </DragDropContext>
+
       </div>
 
       {/* RIGHT PANEL */}
@@ -437,18 +454,6 @@ export default function Deals() {
               )}{" "}
               days
             </p>
-
-            <div className="mt-4 space-y-2">
-
-              <button className="w-full bg-blue-500 text-white py-2 rounded-xl">
-                📞 Call
-              </button>
-
-              <button className="w-full bg-green-500 text-white py-2 rounded-xl">
-                💬 WhatsApp
-              </button>
-
-            </div>
 
           </>
         ) : (
@@ -476,161 +481,229 @@ export default function Deals() {
                 onClick={() =>
                   setShowModal(false)
                 }
-                className="text-gray-400 hover:text-black text-2xl"
+                className="text-2xl text-gray-400"
               >
                 ×
               </button>
 
             </div>
 
-            {/* FORM */}
-            <div className="space-y-4">
+            {/* DEAL NAME */}
+            <div className="mb-4">
 
-              {/* DEAL NAME */}
-              <div>
+              <label className="block text-sm font-medium mb-1">
+                Deal Name
+              </label>
 
-                <label className="block text-sm font-medium mb-1">
-                  Deal Name
-                </label>
+              <input
+                type="text"
+                value={newDeal.title}
+                onChange={(e) =>
+                  setNewDeal({
+                    ...newDeal,
+                    title: e.target.value
+                  })
+                }
+                className="w-full border rounded-xl px-4 py-3"
+              />
 
-                <input
-                  type="text"
-                  value={newDeal.title}
-                  onChange={(e) =>
-                    setNewDeal({
-                      ...newDeal,
-                      title: e.target.value
-                    })
-                  }
-                  placeholder="Enter deal name"
-                  className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                />
+            </div>
 
-              </div>
+            {/* DEAL VALUE */}
+            <div className="mb-4">
 
-              {/* DEAL VALUE */}
-              <div>
+              <label className="block text-sm font-medium mb-1">
+                Deal Value
+              </label>
 
-                <label className="block text-sm font-medium mb-1">
-                  Deal Value
-                </label>
+              <input
+                type="number"
+                value={newDeal.value}
+                onChange={(e) =>
+                  setNewDeal({
+                    ...newDeal,
+                    value: e.target.value
+                  })
+                }
+                className="w-full border rounded-xl px-4 py-3"
+              />
 
-                <input
-                  type="number"
-                  value={newDeal.value}
-                  onChange={(e) =>
-                    setNewDeal({
-                      ...newDeal,
-                      value: e.target.value
-                    })
-                  }
-                  placeholder="Enter amount"
-                  className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                />
+            </div>
 
-              </div>
+            {/* STAGE */}
+            <div className="mb-4">
 
-              {/* STAGE */}
-              <div>
+              <div className="flex justify-between items-center mb-1">
 
-                <label className="block text-sm font-medium mb-1">
+                <label className="text-sm font-medium">
                   Pipeline Stage
                 </label>
 
-                <select
-                  value={newDeal.stage}
-                  onChange={(e) =>
-                    setNewDeal({
-                      ...newDeal,
-                      stage: e.target.value
-                    })
-                  }
-                  className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
-                >
-
-                  <option value="New">
-                    New
-                  </option>
-
-                  <option value="Proposal">
-                    Proposal
-                  </option>
-
-                  <option value="Negotiation">
-                    Negotiation
-                  </option>
-
-                  <option value="Closed">
-                    Closed
-                  </option>
-
-                </select>
-
-              </div>
-
-              {/* CUSTOM FIELD SECTION */}
-              <div className="pt-4 border-t">
-
-                <div className="flex items-center justify-between mb-4">
-
-                  <h3 className="font-semibold text-gray-700">
-                    Custom Fields
-                  </h3>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setShowCustomFieldModal(
-                        true
-                      )
-                    }
-                    className="text-blue-500 text-sm font-medium hover:text-blue-600"
-                  >
-                    + Add Custom Field
-                  </button>
-
-                </div>
-
-                <div className="space-y-4">
-
-                  {customFields.map((field) => (
-                    <div key={field.id}>
-
-                      <label className="block text-sm font-medium mb-1">
-                        {field.label}
-                      </label>
-
-                      {renderCustomFieldInput(
-                        field
-                      )}
-
-                    </div>
-                  ))}
-
-                </div>
-
-              </div>
-
-              {/* BUTTONS */}
-              <div className="flex gap-3 pt-4">
-
                 <button
+                  type="button"
                   onClick={() =>
-                    setShowModal(false)
+                    setShowStageModal(true)
                   }
-                  className="flex-1 border border-gray-300 py-3 rounded-xl hover:bg-gray-100"
+                  className="text-blue-500 text-sm font-medium hover:text-blue-600"
                 >
-                  Cancel
-                </button>
-
-                <button
-                  onClick={handleCreateDeal}
-                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl"
-                >
-                  Create Deal
+                  + Add New Stage
                 </button>
 
               </div>
+
+              <select
+                value={newDeal.stage}
+                onChange={(e) =>
+                  setNewDeal({
+                    ...newDeal,
+                    stage: e.target.value
+                  })
+                }
+                className="w-full border rounded-xl px-4 py-3"
+              >
+
+                {Object.keys(data).map(
+                  (stage) => (
+                    <option
+                      key={stage}
+                      value={stage}
+                    >
+                      {stage}
+                    </option>
+                  )
+                )}
+
+              </select>
+
+            </div>
+
+            {/* CUSTOM FIELD SECTION */}
+            <div className="pt-4 border-t">
+
+              <div className="flex items-center justify-between mb-4">
+
+                <h3 className="font-semibold text-gray-700">
+                  Custom Fields
+                </h3>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setShowCustomFieldModal(
+                      true
+                    )
+                  }
+                  className="text-blue-500 text-sm font-medium"
+                >
+                  + Add Custom Field
+                </button>
+
+              </div>
+
+              <div className="space-y-4">
+
+                {customFields.map((field) => (
+                  <div key={field.id}>
+
+                    <label className="block text-sm font-medium mb-1">
+                      {field.label}
+                    </label>
+
+                    {renderCustomFieldInput(
+                      field
+                    )}
+
+                  </div>
+                ))}
+
+              </div>
+
+            </div>
+
+            {/* BUTTONS */}
+            <div className="flex gap-3 pt-6">
+
+              <button
+                onClick={() =>
+                  setShowModal(false)
+                }
+                className="flex-1 border py-3 rounded-xl"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleCreateDeal}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl"
+              >
+                Create Deal
+              </button>
+
+            </div>
+
+          </div>
+
+        </div>
+      )}
+
+      {/* ADD STAGE MODAL */}
+      {showStageModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-[70]">
+
+          <div className="bg-white w-[400px] rounded-2xl p-6 shadow-2xl">
+
+            <div className="flex justify-between items-center mb-6">
+
+              <h2 className="text-xl font-bold">
+                Add New Stage
+              </h2>
+
+              <button
+                onClick={() =>
+                  setShowStageModal(false)
+                }
+                className="text-2xl text-gray-400"
+              >
+                ×
+              </button>
+
+            </div>
+
+            <div className="mb-6">
+
+              <label className="block text-sm font-medium mb-1">
+                Stage Name
+              </label>
+
+              <input
+                type="text"
+                value={newStage}
+                onChange={(e) =>
+                  setNewStage(e.target.value)
+                }
+                placeholder="Enter stage name"
+                className="w-full border rounded-xl px-4 py-3"
+              />
+
+            </div>
+
+            <div className="flex gap-3">
+
+              <button
+                onClick={() =>
+                  setShowStageModal(false)
+                }
+                className="flex-1 border py-3 rounded-xl"
+              >
+                Cancel
+              </button>
+
+              <button
+                onClick={handleAddStage}
+                className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl"
+              >
+                Add Stage
+              </button>
 
             </div>
 
@@ -645,7 +718,6 @@ export default function Deals() {
 
           <div className="bg-white w-[420px] rounded-2xl p-6 shadow-2xl">
 
-            {/* HEADER */}
             <div className="flex justify-between items-center mb-6">
 
               <h2 className="text-xl font-bold">
@@ -658,14 +730,13 @@ export default function Deals() {
                     false
                   )
                 }
-                className="text-2xl text-gray-400 hover:text-black"
+                className="text-2xl text-gray-400"
               >
                 ×
               </button>
 
             </div>
 
-            {/* FIELD LABEL */}
             <div className="mb-4">
 
               <label className="block text-sm font-medium mb-1">
@@ -681,13 +752,11 @@ export default function Deals() {
                     label: e.target.value
                   })
                 }
-                placeholder="Enter field name"
-                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border rounded-xl px-4 py-3"
               />
 
             </div>
 
-            {/* FIELD TYPE */}
             <div className="mb-6">
 
               <label className="block text-sm font-medium mb-1">
@@ -702,7 +771,7 @@ export default function Deals() {
                     type: e.target.value
                   })
                 }
-                className="w-full border rounded-xl px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full border rounded-xl px-4 py-3"
               >
 
                 <option value="text">
@@ -733,7 +802,6 @@ export default function Deals() {
 
             </div>
 
-            {/* BUTTONS */}
             <div className="flex gap-3">
 
               <button
@@ -742,7 +810,7 @@ export default function Deals() {
                     false
                   )
                 }
-                className="flex-1 border py-3 rounded-xl hover:bg-gray-100"
+                className="flex-1 border py-3 rounded-xl"
               >
                 Cancel
               </button>
