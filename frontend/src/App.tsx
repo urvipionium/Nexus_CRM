@@ -5,6 +5,8 @@ import Deals from "./pages/Deals/Deals";
 import Leads from "./pages/Leads";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 
+
+
 function Dashboard() {
   return <DashboardLayout />;
 }
@@ -16,6 +18,7 @@ function App() {
         <Route index element={<Dashboard />} />
         <Route path="leads" element={<Leads />} />
         <Route path="deals" element={<Deals />} />
+      
       </Route>
     </Routes>
   );
