@@ -1,4 +1,4 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 const Login = () => {
   const navigate = useNavigate();
   console.log("Login page rendered");
@@ -33,9 +33,9 @@ const Login = () => {
           Login
         </button>
         <div className="mt-4 text-center">
-          <a href="frontend\src\pages\Signup\Signup.tsx"className="text-sm text-blue-600 hover:underline transition">
+          <Link to="/signup" className="text-sm text-blue-600 hover:underline transition">
             Didn't have an account?
-          </a>
+          </Link>
         </div>
       </form>
     </div>

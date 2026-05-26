@@ -4,6 +4,9 @@ import Layout from "./components/common/Layout";
 import Deals from "./pages/Deals/Deals";
 import Leads from "./pages/Leads";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
+import WhatsAppModule from "./pages/WhatsApp/WhatsAppModule";
+import Login from "./pages/login/Login";
+import Signup from "./pages/Signup/Signup";
 
 function Dashboard() {
   return <DashboardLayout />;
@@ -14,8 +17,12 @@ function App() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="leads" element={<Leads />} />
         <Route path="deals" element={<Deals />} />
+        <Route path="whatsapp" element={<WhatsAppModule />} />
+        <Route path="login" element={<Login />} />
+        <Route path="signup" element={<Signup />} />
       </Route>
     </Routes>
   );

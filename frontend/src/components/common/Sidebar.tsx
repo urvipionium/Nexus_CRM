@@ -10,6 +10,8 @@ function Sidebar() {
     { name: "Deals", path: "/deals", icon: "💼" },
     { name: "WhatsApp", path: "/whatsapp", icon: "💬" },
     { name: "Reports", path: "/reports", icon: "📈" },
+    { name: "Login", path: "/login", icon: "🔑" },
+    { name: "Signup", path: "/signup", icon: "📝" },
   ];
 
   return (

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Search,
   Send,
@@ -9,13 +9,21 @@ import {
   Smile,
 } from "lucide-react";
 
+type ChatMessage = {
+  sender: "client" | "me";
+  type: "text" | "image";
+  text?: string;
+  imageUrl?: string;
+  time: string;
+};
+
 export default function WhatsAppModule() {
 
   // =========================
   // CONTACTS
   // =========================
 
-  const [contacts] = useState([
+  const [contacts, setContacts] = useState([
     {
       id: 1,
       name: "Rahul Patel",
@@ -49,42 +57,108 @@ export default function WhatsAppModule() {
   const [message, setMessage] =
     useState("");
 
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
   // =========================
   // CHAT DATA
   // =========================
 
-  const [messages, setMessages] =
-    useState([
-      {
-        sender: "client",
-        text: "Hello, I need quotation for 200 bottles.",
-        time: "10:30 AM",
-      },
+  const [messagesByChat, setMessagesByChat] =
+    useState<Record<number, ChatMessage[]>>({
+      1: [
+        {
+          sender: "client",
+          type: "text",
+          text: "Hello, I need quotation for 200 bottles.",
+          time: "10:30 AM",
+        },
+        {
+          sender: "me",
+          type: "text",
+          text: "Sure sir, please share product details.",
+          time: "10:32 AM",
+        },
+      ],
+      2: [
+        {
+          sender: "client",
+          type: "text",
+          text: "Do you have the green variant available?",
+          time: "11:15 AM",
+        },
+      ],
+    });
 
-      {
-        sender: "me",
-        text: "Sure sir, please share product details.",
-        time: "10:32 AM",
-      },
-    ]);
+  const messages = messagesByChat[selectedChat.id] || [];
 
   // =========================
   // SEND MESSAGE
   // =========================
 
   const sendMessage = () => {
-    if (!message) return;
+    if (!message.trim()) return;
 
-    setMessages([
-      ...messages,
-      {
-        sender: "me",
-        text: message,
-        time: "Now",
-      },
-    ]);
+    const newMessage: ChatMessage = {
+      sender: "me",
+      type: "text",
+      text: message.trim(),
+      time: "Now",
+    };
+
+    setMessagesByChat((prev) => ({
+      ...prev,
+      [selectedChat.id]: [
+        ...(prev[selectedChat.id] || []),
+        newMessage,
+      ],
+    }));
+
+    setContacts((prev) =>
+      prev.map((contact) =>
+        contact.id === selectedChat.id
+          ? { ...contact, lastMessage: message.trim() }
+          : contact
+      )
+    );
 
     setMessage("");
+  };
+
+  const openFilePicker = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleImageUpload = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const imageUrl = URL.createObjectURL(file);
+    const newMessage: ChatMessage = {
+      sender: "me",
+      type: "image",
+      imageUrl,
+      time: "Now",
+    };
+
+    setMessagesByChat((prev) => ({
+      ...prev,
+      [selectedChat.id]: [
+        ...(prev[selectedChat.id] || []),
+        newMessage,
+      ],
+    }));
+
+    setContacts((prev) =>
+      prev.map((contact) =>
+        contact.id === selectedChat.id
+          ? { ...contact, lastMessage: "Image attached" }
+          : contact
+      )
+    );
+
+    event.target.value = "";
   };
 
   // =========================
@@ -289,8 +363,15 @@ export default function WhatsAppModule() {
                     : "bg-white text-gray-800"
                 }`}
               >
-
-                <p>{msg.text}</p>
+                {msg.type === "image" ? (
+                  <img
+                    src={msg.imageUrl}
+                    alt="attachment"
+                    className="rounded-3xl max-w-full max-h-96 object-cover"
+                  />
+                ) : (
+                  <p>{msg.text}</p>
+                )}
 
                 <p
                   className={`text-xs mt-2 ${
@@ -350,7 +431,19 @@ export default function WhatsAppModule() {
         <div className="bg-white border-t p-4 flex items-center gap-3">
 
           {/* ATTACH */}
-          <button className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center">
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={handleImageUpload}
+          />
+
+          <button
+            type="button"
+            onClick={openFilePicker}
+            className="w-12 h-12 rounded-2xl bg-gray-100 flex items-center justify-center"
+          >
 
             <Paperclip size={18} />
 
@@ -376,6 +469,7 @@ export default function WhatsAppModule() {
 
           {/* SEND */}
           <button
+            type="button"
             onClick={sendMessage}
             className="w-14 h-14 rounded-2xl bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center shadow-lg"
           >
