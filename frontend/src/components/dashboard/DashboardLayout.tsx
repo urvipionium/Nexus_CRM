@@ -97,9 +97,7 @@ export default function DashboardLayout() {
 
       {/* KPI CARDS */}
       <section className="mb-6 px-4 md:px-0">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <DashboardCards />
-        </div>
+        <DashboardCards />
       </section>
 
       {/* WIDGET GRID */}
