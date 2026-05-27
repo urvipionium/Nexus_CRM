@@ -5,8 +5,6 @@ import Deals from "./pages/Deals/Deals";
 import Leads from "./pages/Leads";
 import DashboardLayout from "./components/dashboard/DashboardLayout";
 
-
-
 function Dashboard() {
   return <DashboardLayout />;
 }
@@ -16,9 +14,9 @@ function App() {
     <Routes>
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
+        <Route path="dashboard" element={<Dashboard />} />
         <Route path="leads" element={<Leads />} />
         <Route path="deals" element={<Deals />} />
-      
       </Route>
     </Routes>
   );

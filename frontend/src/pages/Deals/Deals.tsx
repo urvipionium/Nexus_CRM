@@ -832,3 +832,7 @@ export default function Deals() {
     </div>
   );
 }
+
+
+
+
