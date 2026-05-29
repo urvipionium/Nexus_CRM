@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DashboardCards from "./DashboardCards";
 import SalesChart from "./SalesChart";
 import PipelineSummary from "./PipelineSummary";
@@ -6,28 +6,35 @@ import ActivityPanel from "./ActivityPanel";
 import RecentDeals from "./RecentDeals";
 import WidgetSelectorModal from "./WidgetSelectorModal";
 
+import { getDashboardSummary } from "../../services/dashboardService";
+
 type WidgetKey =
   | "SalesChart"
   | "PipelineSummary"
   | "ActivityPanel"
   | "RecentDeals";
+
 interface WidgetInfo {
   title: string;
   component: React.ComponentType<any>;
 }
+
 const widgetRegistry: Record<WidgetKey, WidgetInfo> = {
   SalesChart: {
     title: "Sales Chart",
     component: SalesChart,
   },
+
   PipelineSummary: {
     title: "Pipeline Summary",
     component: PipelineSummary,
   },
+
   ActivityPanel: {
     title: "Activity Panel",
     component: ActivityPanel,
   },
+
   RecentDeals: {
     title: "Recent Deals",
     component: RecentDeals,
@@ -39,6 +46,7 @@ type Condition = {
   operator: string;
   value: string;
 };
+
 type WidgetConfig = {
   widgetType: WidgetKey;
   componentName: string;
@@ -47,22 +55,28 @@ type WidgetConfig = {
 
 export default function DashboardLayout() {
   const [showModal, setShowModal] = useState(false);
+
+  const [summary, setSummary] = useState<any>(null);
+
   const [widgets, setWidgets] = useState<WidgetConfig[]>([
     {
       widgetType: "SalesChart",
       componentName: "Sales Chart",
       conditions: [],
     },
+
     {
       widgetType: "PipelineSummary",
       componentName: "Pipeline Summary",
       conditions: [],
     },
+
     {
       widgetType: "ActivityPanel",
       componentName: "Activity Panel",
       conditions: [],
     },
+
     {
       widgetType: "RecentDeals",
       componentName: "Recent Deals",
@@ -70,8 +84,25 @@ export default function DashboardLayout() {
     },
   ]);
 
+  // FETCH DASHBOARD SUMMARY
+  useEffect(() => {
+    const fetchDashboard = async () => {
+      try {
+        const data = await getDashboardSummary();
+
+        setSummary(data);
+      } catch (error) {
+        console.error("Dashboard fetch failed", error);
+      }
+    };
+
+    fetchDashboard();
+  }, []);
+
+  // ADD NEW WIDGET
   const addWidget = (config: WidgetConfig) => {
     setWidgets([...widgets, config]);
+
     setShowModal(false);
   };
 
@@ -83,10 +114,12 @@ export default function DashboardLayout() {
           <h1 className="text-3xl font-extrabold text-slate-800 tracking-tight mb-1">
             CRM Dashboard
           </h1>
+
           <p className="text-slate-500 text-lg">
             Welcome back! Here’s your business at a glance.
           </p>
         </div>
+
         <button
           onClick={() => setShowModal(true)}
           className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2 rounded-xl shadow-lg hover:scale-105 hover:shadow-xl transition font-semibold"
@@ -97,16 +130,26 @@ export default function DashboardLayout() {
 
       {/* KPI CARDS */}
       <section className="mb-6 px-4 md:px-0">
-        <DashboardCards />
+        <DashboardCards summary={summary} />
       </section>
 
       {/* WIDGET GRID */}
       <section className="px-4 md:px-0">
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
           {widgets.map((widget, idx) => {
+            // AUTO HIDE SALES CHART IF NO DEALS
+            if (
+              widget.widgetType === "SalesChart" &&
+              summary?.totalDeals === 0
+            ) {
+              return null;
+            }
+
             const WidgetComp = widgetRegistry[widget.widgetType].component;
+
             const title =
               widget.componentName || widgetRegistry[widget.widgetType].title;
+
             return (
               <div
                 key={idx}
@@ -116,11 +159,13 @@ export default function DashboardLayout() {
                   <h2 className="text-lg font-bold text-slate-700 group-hover:text-indigo-600 transition">
                     {title}
                   </h2>
-                  {/* Remove widget button (optional) */}
-                  {/* <button className="text-slate-400 hover:text-red-500" onClick={() => removeWidget(idx)}>&times;</button> */}
                 </div>
+
                 <div className="flex-1">
-                  <WidgetComp conditions={widget.conditions} />
+                  <WidgetComp
+                    conditions={widget.conditions}
+                    summary={summary}
+                  />
                 </div>
               </div>
             );
@@ -128,7 +173,7 @@ export default function DashboardLayout() {
         </div>
       </section>
 
-      {/* Widget Selector Modal */}
+      {/* MODAL */}
       {showModal && <WidgetSelectorModal onAdd={addWidget} />}
     </div>
   );
