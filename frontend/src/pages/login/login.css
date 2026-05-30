@@ -72,18 +72,62 @@
     border: 1px solid rgba(15, 23, 42, 0.08);
     box-shadow: 0 18px 42px rgba(15, 23, 42, 0.1);
     padding: 10px;
+    animation: float-rotate 6s ease-in-out infinite;
+    position: relative;
+}
+
+.logo-circle::before {
+    content: "";
+    position: absolute;
+    inset: 8px;
+    border-radius: 9999px;
+    border: 1px dashed rgba(14, 165, 233, 0.25);
+    opacity: 0.8;
+    animation: pulse-ring 3.5s ease-in-out infinite;
 }
 
 .logo-image {
     width: 62px;
     height: 62px;
     object-fit: contain;
+    animation: logo-spin 10s linear infinite;
 }
 
 .logo-text .company {
     font-weight: 700;
     color: #144e8c;
     font-size: 19px;
+}
+
+@keyframes float-rotate {
+    0%,
+    100% {
+        transform: translateY(0) rotate(0deg);
+    }
+    50% {
+        transform: translateY(-8px) rotate(4deg);
+    }
+}
+
+@keyframes logo-spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes pulse-ring {
+    0%,
+    100% {
+        opacity: 0.75;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.2;
+        transform: scale(1.12);
+    }
 }
 
 .logo-text .subtitle {
