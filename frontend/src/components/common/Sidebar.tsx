@@ -5,18 +5,18 @@ function Sidebar() {
   const location = useLocation();
 
   const menu = [
-    { name: "Dashboard", path: "/", icon: "📊" },
-    { name: "Leads", path: "/leads", icon: "👥" },
-    { name: "Deals", path: "/deals", icon: "💼" },
-    { name: "WhatsApp", path: "/whatsapp", icon: "💬" },
-    { name: "Reports", path: "/reports", icon: "📈" },
-    { name: "Login", path: "/login", icon: "🔑" },
-    { name: "Signup", path: "/signup", icon: "📝" },
+    { name: "Dashboard", path: "/", icon: "" },
+    { name: "Leads", path: "/leads", icon: "" },
+    { name: "Deals", path: "/deals", icon: "" },
+    { name: "WhatsApp", path: "/whatsapp", icon: "" },
+    { name: "Reports", path: "/reports", icon: "" },
+    { name: "Login", path: "/login", icon: "" },
+    { name: "Signup", path: "/signup", icon: "" },
   ];
 
   return (
     <div className="w-64 h-screen bg-white border-r shadow-sm flex flex-col p-4">
-      <h1 className="text-xl font-bold text-blue-600 mb-6">🚀 CRM</h1>
+      <h1 className="text-xl font-bold text-blue-600 mb-6">Nexus CRM</h1>
 
       <div className="flex flex-col gap-2">
         {menu.map((item, index) => {
