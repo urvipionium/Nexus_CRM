@@ -1,45 +1,55 @@
 import { Link, useNavigate } from "react-router-dom";
+import logo from "./logo.png";
+import "./login.css";
+
 const Login = () => {
   const navigate = useNavigate();
-  console.log("Login page rendered");
   const handleSubmit = (event: any) => {
     event.preventDefault();
-    console.log("Login form submitted");
     navigate("/dashboard");
   };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-100 via-white to-slate-200 px-4">
-      <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200 p-8">
-        <h2 className="text-3xl font-bold mb-2 text-center text-slate-900">Login</h2>
-        <p className="text-sm text-slate-500 mb-8 text-center">
-          Welcome back! Sign in to continue to your dashboard.
-        </p>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <input
-            type="email"
-            placeholder="Email"
-            className="w-full p-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            className="w-full p-3 border border-slate-200 rounded-2xl focus:outline-none focus:ring-2 focus:ring-slate-300 transition"
-          />
-          <button
-            className="w-full bg-gradient-to-r from-sky-500 to-indigo-500 text-white p-3 rounded-2xl font-semibold shadow hover:from-sky-600 hover:to-indigo-600 transition duration-150"
-            type="submit"
-          >
-            Login
-          </button>
-        </form>
-        <div className="mt-6 text-center text-sm text-slate-600">
-          Don&apos;t have an account?{' '}
-          <Link to="/signup" className="text-sky-600 hover:text-sky-700 font-medium">
-            Signup
-          </Link>
+    <div className="auth-wrapper">
+      <div className="bg-blob blob-top" aria-hidden />
+      <div className="bg-blob blob-bottom" aria-hidden />
+
+      <div className="auth-card">
+        <div className="logo-wrap">
+          <div className="logo-circle">
+            <img src={logo} alt="Pionium logo" className="logo-image" />
+          </div>
+          <div className="logo-text">
+            <div className="company">Pionium Consultant Pvt Ltd</div>
+            <div className="subtitle">EMPLOYEE PORTAL</div>
+          </div>
         </div>
+
+        <form onSubmit={handleSubmit} className="auth-form">
+          <label className="input-label">Employee ID</label>
+          <div className="input-with-icon">
+            <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 12a4 4 0 100-8 4 4 0 000 8z" stroke="#9CA3AF" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="#9CA3AF" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <input type="text" placeholder="e.g. EMP001" className="auth-input" />
+          </div>
+
+          <label className="input-label">Password</label>
+          <div className="input-with-icon">
+            <svg className="input-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="3" y="11" width="18" height="11" rx="2" stroke="#9CA3AF" strokeWidth="1.2"/><path d="M7 11V8a5 5 0 0110 0v3" stroke="#9CA3AF" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+            <input type="password" placeholder="Enter your password" className="auth-input" />
+            <button type="button" className="eye-btn" aria-label="toggle password">👁️</button>
+          </div>
+
+          <div className="row between">
+            <label className="remember"><input type="checkbox" className="mr-2" /> Remember me</label>
+            <a className="forgot" href="#">Forgot Password?</a>
+          </div>
+
+          <button type="submit" className="primary-btn">Sign In →</button>
+        </form>
+
+        <div className="footer-note">Don’t have an account? <Link to="/signup" className="link">Sign up</Link></div>
       </div>
     </div>
   );
 };
+
 export default Login;
