@@ -16,6 +16,9 @@ function Dashboard() {
 function App() {
   return (
     <Routes>
+      <Route path="/login" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
+
       <Route path="/" element={<Layout />}>
         <Route index element={<Dashboard />} />
         <Route path="dashboard" element={<Dashboard />} />
@@ -23,8 +26,6 @@ function App() {
         <Route path="deals" element={<Deals />} />
         <Route path="whatsapp" element={<WhatsAppModule />} />
         <Route path="reports" element={<Reports />} />
-        <Route path="/login" element={<Login />} />
-  <Route path="/signup" element={<Signup />} />
       </Route>
     </Routes>
   );
