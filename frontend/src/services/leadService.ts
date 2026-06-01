@@ -1,4 +1,14 @@
-import type { CustomField, Lead, LeadNote, LeadTask, LeadActivity, WhatsAppMessage, LeadSource, LeadStatus } from "../types/lead";
+import axios from "axios";
+import type {
+  CustomField,
+  Lead,
+  LeadNote,
+  LeadTask,
+  LeadActivity,
+  WhatsAppMessage,
+  LeadSource,
+  LeadStatus,
+} from "../types/lead";
 
 const LEADS_KEY = "crm_leads_v1";
 const STAGES_KEY = "crm_lead_stages_v1";
@@ -7,9 +17,21 @@ const FIELDS_KEY = "crm_lead_fields_v1";
 const defaultStages = ["New", "Contacted", "Qualified", "Won", "Converted"];
 
 const defaultFields: CustomField[] = [
-  { id: "industry", key: "industry", label: "Industry", type: "text", value: "" },
+  {
+    id: "industry",
+    key: "industry",
+    label: "Industry",
+    type: "text",
+    value: "",
+  },
   { id: "rating", key: "rating", label: "Rating", type: "text", value: "" },
-  { id: "sourceDetail", key: "sourceDetail", label: "Source detail", type: "text", value: "" },
+  {
+    id: "sourceDetail",
+    key: "sourceDetail",
+    label: "Source detail",
+    type: "text",
+    value: "",
+  },
 ];
 
 const seedLeads: Lead[] = [
@@ -30,17 +52,42 @@ const seedLeads: Lead[] = [
     score: 72,
     custom: { industry: "SaaS", rating: "A", sourceDetail: "Web form" },
     notes: [
-      { id: "n-1", text: "Reached out by email; waiting for reply.", createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString() },
+      {
+        id: "n-1",
+        text: "Reached out by email; waiting for reply.",
+        createdAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      },
     ],
     tasks: [
-      { id: "t-1", title: "Send pricing deck", dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(), completed: false },
+      {
+        id: "t-1",
+        title: "Send pricing deck",
+        dueDate: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000).toISOString(),
+        completed: false,
+      },
     ],
     activities: [
-      { id: "a-1", type: "email", text: "Intro email sent.", ts: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(), user: "Ravi" },
+      {
+        id: "a-1",
+        type: "email",
+        text: "Intro email sent.",
+        ts: new Date(Date.now() - 36 * 60 * 60 * 1000).toISOString(),
+        user: "Ravi",
+      },
     ],
     chat: [
-      { id: "c-1", sender: "me", text: "Hi Aisha, I sent the proposal. Please review.", ts: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() },
-      { id: "c-2", sender: "contact", text: "Thanks, I will look today.", ts: new Date(Date.now() - 22 * 60 * 60 * 1000).toISOString() },
+      {
+        id: "c-1",
+        sender: "me",
+        text: "Hi Aisha, I sent the proposal. Please review.",
+        ts: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+      },
+      {
+        id: "c-2",
+        sender: "contact",
+        text: "Thanks, I will look today.",
+        ts: new Date(Date.now() - 22 * 60 * 60 * 1000).toISOString(),
+      },
     ],
     createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
     updatedAt: new Date().toISOString(),
@@ -117,8 +164,10 @@ function readFields(): CustomField[] {
   }
 }
 
-export async function fetchLeads(): Promise<Lead[]> {
-  return Promise.resolve(readLeads());
+export async function fetchLeads(): Promise<any[]> {
+  const response = await axios.get("http://127.0.0.1:8000/leads");
+
+  return response.data;
 }
 
 export async function createLead(payload: Partial<Lead>): Promise<Lead> {
@@ -152,11 +201,18 @@ export async function createLead(payload: Partial<Lead>): Promise<Lead> {
   return Promise.resolve(lead);
 }
 
-export async function updateLead(id: string, data: Partial<Lead>): Promise<Lead | null> {
+export async function updateLead(
+  id: string,
+  data: Partial<Lead>,
+): Promise<Lead | null> {
   const leads = readLeads();
   const index = leads.findIndex((lead) => lead.id === id);
   if (index === -1) return Promise.resolve(null);
-  const updated = { ...leads[index], ...data, updatedAt: new Date().toISOString() };
+  const updated = {
+    ...leads[index],
+    ...data,
+    updatedAt: new Date().toISOString(),
+  };
   leads[index] = updated;
   writeLeads(leads);
   return Promise.resolve(updated);
@@ -180,3 +236,9 @@ export async function saveStages(stages: string[]): Promise<void> {
 export async function fetchCustomFields(): Promise<CustomField[]> {
   return Promise.resolve(readFields());
 }
+
+export const getLeads = async () => {
+  const response = await axios.get("http://127.0.0.1:8000/leads");
+
+  return response.data;
+};
