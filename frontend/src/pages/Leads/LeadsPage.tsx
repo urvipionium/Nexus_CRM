@@ -109,6 +109,8 @@ const FIELD_TYPE_OPTIONS = [
   },
 ];
 
+type FieldType = typeof FIELD_TYPE_OPTIONS[number]["type"];
+
 const STAGE_PALETTE = [
   { color: "#6366f1", bg: "#eef2ff", bar: "from-indigo-400 to-indigo-600" },
   { color: "#f59e0b", bg: "#fffbeb", bar: "from-amber-400 to-amber-500" },
@@ -1869,10 +1871,7 @@ function UsersAndControlsPage() {
   ];
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <SectionHeader
-        title="Users and Controls"
-        subtitle="Manage team members, roles, profiles and compliance"
-      />
+      <SectionHeader title="Users and Controls" subtitle="Manage team members, roles, profiles and compliance" />
       <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
       <div className="flex-1 overflow-hidden">
         {activeTab === "users" && <UsersTab />}
@@ -1891,13 +1890,9 @@ function UsersAndControlsPage() {
 function PlaceholderPage({ icon: Icon, title, desc }) {
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <SectionHeader title={title} subtitle={desc} />
+      <SectionHeader title={title} subtitle={desc} action={undefined} />
       <div className="flex-1 flex items-center justify-center">
-        <EmptyState
-          icon={Icon}
-          title={`${title} settings`}
-          desc="This module is coming soon. Stay tuned!"
-        />
+        <EmptyState icon={Icon} title={`${title} settings`} desc="This module is coming soon. Stay tuned!" />
       </div>
     </div>
   );
@@ -2003,7 +1998,7 @@ function SettingsSidebar({ active, onChange, collapsed, onToggle }) {
 // SETTINGS PAGE
 // ─────────────────────────────────────────────────────────
 
-function SettingsPage({ onBack }) {
+function SettingsPage({ onBack }: { onBack: () => void }) {
   const [activeSection, setActiveSection] = useState("users");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
 
