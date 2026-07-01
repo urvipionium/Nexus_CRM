@@ -1,10 +1,17 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.routes.leads import router as leads_router
-from app.routes.dashboard import router as dashboard_router
+from app.routes import auth
+from app.routes import customers
+from app.routes import users
+from app.routes import leads
+from app.routes import deals
+from app.routes import tasks
+from app.routes import dashboard
+
 
 app = FastAPI()
+
 
 # CORS Configuration
 app.add_middleware(
@@ -16,13 +23,20 @@ app.add_middleware(
 )
 
 app.include_router(
-    dashboard_router,
+    dashboard.router,
     prefix="/dashboard",
     tags=["Dashboard"]
 )
+app.include_router(auth.router)
+app.include_router(customers.router)
+app.include_router(users.router)
+app.include_router(leads.router)
+app.include_router(deals.router)
+app.include_router(tasks.router)
+
 
 app.include_router(
-    leads_router,
+    leads.router,
     prefix="/leads",
     tags=["Leads"]
 )
@@ -30,5 +44,7 @@ app.include_router(
 @app.get("/")
 def home():
     return {
-        "message": "CRM Backend Running"
+        "message": "CRM Backend Running",
+        "message": "Auth Working"
     }
+    
