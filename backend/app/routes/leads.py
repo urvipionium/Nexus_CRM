@@ -1,6 +1,9 @@
 from fastapi import APIRouter
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/leads",
+    tags=["Leads"]
+)
 
 @router.get("/")
 def get_leads():
