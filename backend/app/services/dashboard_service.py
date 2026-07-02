@@ -1,18 +1,16 @@
-from models.lead import Lead
-from models.deal import Deal
+from sqlalchemy.orm import Session
 
-def get_dashboard_summary(db):
+from app.models.customer import Customer
+from app.models.lead import Lead
+from app.models.deal import Deal
 
-    total_leads = db.query(Lead).count()
 
-    total_deals = db.query(Deal).count()
-
-    won_deals = db.query(Deal).filter(
-        Deal.status == "won"
-    ).count()
+def dashboard_summary(db: Session):
 
     return {
-        "totalLeads": total_leads,
-        "totalDeals": total_deals,
-        "wonDeals": won_deals
-    }
+        "customers": db.query(Customer).count(),
+        "leads": db.query(Lead).count(),
+        "deals": db.query(Deal).count(),
+    } 
+    
+    
